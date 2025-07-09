@@ -1,8 +1,8 @@
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/Authcontext";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import logo from "../assets/logo.png"; // Make sure this is a valid image path
+import Menu from "lucide-react/dist/esm/icons/menu";
+import X from "lucide-react/dist/esm/icons/x";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
