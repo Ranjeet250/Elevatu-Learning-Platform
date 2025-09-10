@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import place from "../assets/placeholdernew.png";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { analyzeResume } from "../api/resumeapi"; // your backend API
 
 export default function Home() {
   const { user } = useAuth();
@@ -11,13 +12,14 @@ export default function Home() {
   const [interest, setInterest] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleShowRoadmap = () => {
-    if (!interest) {
-      toast.error("Please select your interest.");
-      return;
-    }
+  // Resume Checker
+  const [file, setFile] = useState(null);
+  const [resumeLoading, setResumeLoading] = useState(false);
 
-    const interestRoutes = {
+  const handleShowRoadmap = () => {
+    if (!interest) return toast.error("Please select your interest.");
+
+    const routes = {
       "Web Development": "/roadmap/web-development",
       "GEN'AI": "/roadmap/GEN'AI",
       Cybersecurity: "/roadmap/cybersecurity",
@@ -25,23 +27,46 @@ export default function Home() {
       "Machine Learning": "/roadmap/machine-learning",
     };
 
-    const route = interestRoutes[interest];
-
-    if (route) {
-      navigate(route);
-    } else {
-      toast.error("Selected roadmap is not available.");
-    }
+    const route = routes[interest];
+    if (route) navigate(route);
+    else toast.error("Selected roadmap is not available.");
   };
 
+  const handleAnalyze = async () => {
+    if (!file) {
+      toast.error("Please upload a resume first!");
+      return;
+    }
+
+    setResumeLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      // ✅ Call API
+      const response = await analyzeResume(formData);
+
+      if (response?.analysis) {
+        navigate("/result", { state: { result: response.analysis } });
+      } else {
+        toast.error("Analysis failed. Please try another resume.");
+      }
+    } catch (error) {
+      toast.error("Error analyzing resume. Try again.");
+      console.error(error);
+    } finally {
+      setResumeLoading(false);
+    }
+  };
   return (
-    <div className="px-3 md:px-10 mt-10 space-y-16 ">
-      {/* 🌟 Hero Section */}
+    <div className="px-4 md:px-10 mt-10 space-y-16">
+      {/* Hero Section */}
       <section className="flex flex-col-reverse md:flex-row items-center justify-between bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-inner p-6">
         <div className="max-w-xl">
           <h1 className="text-5xl font-extrabold mb-4 text-blue-800 leading-tight">
-            Build Your Career <br />{" "}
-            <span className="text-blue-600">Smartly</span>
+            Build Your Career <br />
+            <span className="text-blue-700">Smartly</span>
           </h1>
           <p className="text-gray-700 mb-6 text-lg">
             Choose your domain and we’ll guide you through the best learning
@@ -86,9 +111,9 @@ export default function Home() {
         />
       </section>
 
-      {/* 🎯 Dashboard Section */}
+      {/* Dashboard Section */}
       {user && (
-        <section className="bg-white p-8 rounded-xl shadow-lg border border-blue-100">
+        <section className="bg-white p-8 rounded-xl shadow-lg border border-blue-100 space-y-6">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">
             🎯 Dashboard
           </h2>
@@ -98,6 +123,7 @@ export default function Home() {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Roadmaps */}
             <Link
               to="/roadmap"
               className="bg-gradient-to-r from-blue-100 to-blue-200 hover:from-blue-200 hover:to-blue-300 p-6 rounded-lg shadow text-center transition transform hover:-translate-y-1"
@@ -110,6 +136,7 @@ export default function Home() {
               </p>
             </Link>
 
+            {/* Courses */}
             <Link
               to="/courses"
               className="bg-gradient-to-r from-green-100 to-green-200 hover:from-green-200 hover:to-green-300 p-6 rounded-lg shadow text-center transition transform hover:-translate-y-1"
@@ -121,6 +148,33 @@ export default function Home() {
                 View available curated courses
               </p>
             </Link>
+
+            {/* Resume Checker */}
+            <div className="col-span-1 bg-gradient-to-r from-purple-100 to-purple-200 p-6 rounded-lg shadow text-center transition transform hover:-translate-y-1">
+              <h3 className="text-2xl font-semibold text-purple-800 mb-3">
+                📄 Resume Checker
+              </h3>
+
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={(e) => setFile(e.target.files[0])}
+                className="mb-3 w-full p-2 border border-gray-300 rounded"
+              />
+
+              <button
+                className="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition"
+                onClick={handleAnalyze}
+                disabled={resumeLoading}
+              >
+                {resumeLoading ? "Analyzing..." : "Analyze Resume"}
+              </button>
+
+              <p className="mt-2 text-gray-700 text-sm">
+                Your resume will be analyzed for skills, experience, education,
+                suitable roles, and ATS score.
+              </p>
+            </div>
           </div>
         </section>
       )}
