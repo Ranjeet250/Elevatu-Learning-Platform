@@ -1,15 +1,16 @@
-// ✅ Load env first
+﻿// Load env first
 import dotenv from "dotenv";
 dotenv.config();
 
-// ✅ Debug environment
+// Debug environment
 console.log(
   "DEBUG env keys:",
   Object.keys(process.env).filter(
     (k) =>
       k.includes("HUGGINGFACE") ||
       k.includes("CLOUDINARY") ||
-      k.includes("PORT")
+      k.includes("PORT") ||
+      k.includes("JWT")
   )
 );
 console.log("DEBUG HuggingFace Token:", process.env.HUGGINGFACE_API_KEY);
@@ -20,12 +21,15 @@ import cors from "cors";
 
 import connectDB from "./config/db.js";
 import resumeRoutes from "./routes/resume.routes.js";
+import courseRoutes from "./routes/courseroutes.js";
+import userRoutes from "./routes/userouteslogin.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
-// 🔑 Check for API keys
+// Check for API keys
 if (!process.env.HUGGINGFACE_API_KEY) {
-  console.error("❌ HUGGINGFACE_API_KEY is missing in .env");
+  console.error("HUGGINGFACE_API_KEY is missing in .env");
 } else {
-  console.log("✅ HUGGINGFACE_API_KEY found");
+  console.log("HUGGINGFACE_API_KEY found");
 }
 
 if (
@@ -33,9 +37,15 @@ if (
   !process.env.CLOUDINARY_API_KEY ||
   !process.env.CLOUDINARY_API_SECRET
 ) {
-  console.error("❌ Cloudinary keys are missing in .env");
+  console.error("Cloudinary keys are missing in .env");
 } else {
-  console.log("✅ Cloudinary keys found");
+  console.log("Cloudinary keys found");
+}
+
+if (!process.env.JWT_SECRET) {
+  console.error("JWT_SECRET is missing in .env");
+} else {
+  console.log("JWT_SECRET found");
 }
 
 // Start the server
@@ -48,20 +58,17 @@ const startServer = async () => {
     app.use(express.json());
 
     // Routes
-    app.use("/api/resumes", resumeRoutes);
+    app.use("/api/resume", resumeRoutes);
+    app.use("/api/courses", courseRoutes);
+    app.use("/api/users", userRoutes);
+    app.use("/api/payments", paymentRoutes);
 
-    // Health check
-    app.get("/", (req, res) => {
-      res.send("🚀 ElevateU API with Hugging Face + Cloudinary is running...");
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log("Server is running on http://localhost:" + PORT);
     });
-
-    // ✅ Fix: use PORT, not PORT_NO
-    const PORT = process.env.PORT || 4003;
-    app.listen(PORT, () =>
-      console.log(`✅ Server running on http://localhost:${PORT}`)
-    );
-  } catch (error) {
-    console.error("❌ Failed to start server:", error.message);
+  } catch (err) {
+    console.error("Failed to start server:", err);
     process.exit(1);
   }
 };

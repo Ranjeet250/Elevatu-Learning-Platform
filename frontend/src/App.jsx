@@ -1,4 +1,4 @@
-import {
+﻿import {
   BrowserRouter as Router,
   Routes,
   Route,
@@ -14,31 +14,49 @@ import Register from "./pages/Register";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ScrollToTop from "./components/ScrollToTop";
-
 import PrivateRoute from "./components/PrivateRoutes";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 
-// Roadmap pages
+// Admin Pages
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminAddCourse from "./pages/AdminAddCourse";
+import AdminCourseForm from "./pages/AdminCourseForm";
+import AdminCourses from "./pages/AdminCourses";
+
+// Course Pages
+import Courses from "./pages/courses/Courses";
+import CourseDetails from "./pages/CourseDetails";
+import TechCourses from "./pages/TechCourses";
+import NonTechCourses from "./pages/NonTechCourses";
+
+// Other Pages
 import WebDevelopment from "./pages/roadmaps/WebDevelopment";
 import AIML from "./pages/roadmaps/GEN'AI";
 import Cybersecurity from "./pages/roadmaps/Cybersecurity";
 import DataAnalyst from "./pages/roadmaps/DataAnalyst";
 import MachineLearning from "./pages/roadmaps/MachineLearning";
 
-// Courses pages
-import Courses from "./pages/courses/Courses";
 import WebDevelopmentCourse from "./pages/courses/Webdev";
 import AIMLCourse from "./pages/courses/GEN'AI";
 import CybersecurityCourse from "./pages/courses/cybersecurity";
 import DataAnalystCourse from "./pages/courses/DA";
 import MachineLearningCourse from "./pages/courses/ML";
 
-// Resume Checker
 import ResumeChecker from "./pages/Resumechecker";
 import ResumeResult from "./components/ResumeResult";
+import PaymentEnrollment from "./pages/PaymentEnrollment";
 
 function AppLayout({ children }) {
   const location = useLocation();
-  const noLayoutRoutes = ["/result"]; // Hide Navbar/Footer
+  const noLayoutRoutes = [
+    "/result",
+    "/admin-login",
+    "/admin",
+    "/admin/add-course",
+    "/admin/courses",
+    "/admin/create-course",
+  ];
   const hideLayout = noLayoutRoutes.includes(location.pathname);
 
   return (
@@ -49,7 +67,7 @@ function AppLayout({ children }) {
 
       <main className="flex-grow">
         {children}
-        <ToastContainer position="top-center" autoClose={3000} />
+        <ScrollToTop />
       </main>
 
       {!hideLayout && <Footer />}
@@ -60,23 +78,38 @@ function AppLayout({ children }) {
 function App() {
   return (
     <Router>
-      <ScrollToTop />
       <AppLayout>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/contact" element={<Contact />} />
-          {/* Roadmap pages */}
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:id" element={<CourseDetails />} />
+          <Route path="/tech-courses" element={<TechCourses />} />
+          <Route path="/non-tech-courses" element={<NonTechCourses />} />
+          <Route path="/roadmap" element={<Roadmap />} />
+
+          {/* Resume Checker */}
+          <Route
+            path="/resume-checker"
+            element={
+              <PrivateRoute>
+                <ResumeChecker />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/result" element={<ResumeResult />} />
+
+          {/* Roadmap Routes */}
           <Route path="/roadmap/web-development" element={<WebDevelopment />} />
           <Route path="/roadmap/GEN'AI" element={<AIML />} />
           <Route path="/roadmap/cybersecurity" element={<Cybersecurity />} />
           <Route path="/roadmap/data-analyst" element={<DataAnalyst />} />
-          <Route
-            path="/roadmap/machine-learning"
-            element={<MachineLearning />}
-          />
-          {/* Courses */}
-          <Route path="/courses" element={<Courses />} />
+          <Route path="/roadmap/machine-learning" element={<MachineLearning />} />
+
+          {/* Course Routes */}
           <Route
             path="/courses/Webdev"
             element={
@@ -117,23 +150,49 @@ function App() {
               </PrivateRoute>
             }
           />
-          {/* Resume Checker */}
+
+$newRoute
+                    {/* Admin Routes */}
+          <Route path="/admin-login" element={<AdminLogin />} />
           <Route
-            path="/resume-checker"
+            path="/admin"
             element={
-              <PrivateRoute>
-                <ResumeChecker />
-              </PrivateRoute>
+              <ProtectedAdminRoute>
+                <AdminDashboard />
+              </ProtectedAdminRoute>
             }
           />
-          <Route path="/result" element={<ResumeResult />} /> {/* FULL page */}
-          {/* Auth */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route
+            path="/admin/add-course"
+            element={
+              <ProtectedAdminRoute>
+                <AdminAddCourse />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/courses"
+            element={
+              <ProtectedAdminRoute>
+                <AdminCourses />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/create-course"
+            element={
+              <ProtectedAdminRoute>
+                <AdminCourseForm />
+              </ProtectedAdminRoute>
+            }
+          />
         </Routes>
+
+        <ToastContainer position="top-right" autoClose={3000} />
       </AppLayout>
     </Router>
   );
 }
 
 export default App;
+

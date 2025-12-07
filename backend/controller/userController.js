@@ -1,21 +1,28 @@
-import User from "../models/user.js";
+﻿import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
     if (userExists)
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({
+        status: 400,
+        message: "User already exists",
+      });
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Only allow 'student' or 'admin' roles, default to 'student'
+    const userRole = ["admin", "student"].includes(role) ? role : "student";
 
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
+      role: userRole,
     });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -23,16 +30,22 @@ export const registerUser = async (req, res) => {
     });
 
     res.status(201).json({
+      status: 201,
+      message: "User registered successfully",
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
       token,
     });
   } catch (err) {
-    console.error("❌ Register Error:", err);
-    res.status(500).json({ message: "Error registering user" });
+    console.error("Register Error:", err);
+    res.status(500).json({
+      status: 500,
+      message: "Error registering user",
+    });
   }
 };
 
@@ -41,26 +54,56 @@ export const loginUser = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user)
+      return res.status(404).json({
+        status: 404,
+        message: "User not found",
+      });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({
+        status: 401,
+        message: "Invalid credentials",
+      });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
     res.status(200).json({
+      status: 200,
+      message: "Login successful",
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
       token,
     });
   } catch (err) {
-    console.error("❌ Login Error:", err);
-    res.status(500).json({ message: "Error logging in" });
+    console.error("Login Error:", err);
+    res.status(500).json({
+      status: 500,
+      message: "Error logging in",
+    });
+  }
+};
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    res.status(200).json({
+      status: 200,
+      message: "User retrieved successfully",
+      user,
+    });
+  } catch (err) {
+    console.error("Get User Error:", err);
+    res.status(500).json({
+      status: 500,
+      message: "Error fetching user",
+    });
   }
 };

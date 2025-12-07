@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+﻿import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 
 export const protect = async (req, res, next) => {
@@ -14,11 +14,15 @@ export const protect = async (req, res, next) => {
       req.user = await User.findById(decoded.id).select("-password");
       next();
     } catch (err) {
-      return res.status(401).json({ message: "Not authorized, token failed" });
+      return res.status(401).json({
+        status: 401,
+        message: "Not authorized, token failed",
+      });
     }
-  }
-
-  if (!token) {
-    return res.status(401).json({ message: "Not authorized, no token" });
+  } else if (!token) {
+    return res.status(401).json({
+      status: 401,
+      message: "Not authorized, no token",
+    });
   }
 };

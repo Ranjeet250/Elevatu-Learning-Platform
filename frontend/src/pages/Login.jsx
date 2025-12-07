@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { loginUser } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/Authcontext";
@@ -20,12 +20,14 @@ export default function Login() {
 
     try {
       const res = await loginUser(form);
-      login(res.data);
+      login(res.data.user, res.data.token);
 
-      toast.success("Login successful!"); // ✅ toast success
-      navigate("/"); // redirect to Home
+      toast.success("Login successful!");
+      navigate("/");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed"); // ✅ toast error
+      const errorMessage = error.response?.data?.message || "Login failed";
+      toast.error(errorMessage);
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }
@@ -45,7 +47,7 @@ export default function Login() {
           type="email"
           name="email"
           placeholder="Email"
-          className="w-full border p-3 mb-4 rounded focus:outline-none"
+          className="w-full border border-gray-300 p-3 mb-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={form.email}
           onChange={handleChange}
           required
@@ -55,7 +57,7 @@ export default function Login() {
           type="password"
           name="password"
           placeholder="Password"
-          className="w-full border p-3 mb-6 rounded focus:outline-none"
+          className="w-full border border-gray-300 p-3 mb-6 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={form.password}
           onChange={handleChange}
           required
@@ -64,15 +66,22 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 transition disabled:opacity-50"
         >
           {loading ? "Logging in..." : "Login"}
         </button>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
-          <a href="/register" className="text-blue-600 underline">
+        <p className="text-center text-gray-600 mt-4">
+          Don't have an account?{" "}
+          <a href="/register" className="text-blue-600 hover:underline">
             Register here
+          </a>
+        </p>
+
+        <p className="text-center text-sm text-gray-500 mt-6 border-t pt-4">
+          Admin? Go to{" "}
+          <a href="/admin-login" className="text-blue-600 hover:underline">
+            Admin Login
           </a>
         </p>
       </form>

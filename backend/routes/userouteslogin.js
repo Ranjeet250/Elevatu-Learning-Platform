@@ -1,11 +1,14 @@
-import express from "express";
-import { registerUser, loginUser } from "../controller/userController.js";
+﻿import express from "express";
+import { registerUser, loginUser, getCurrentUser } from "../controller/userController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Public routes
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 
-// ❌ Removed the unused /admin/dashboard route and adminOnly middleware
+// Protected routes
+router.get("/profile", protect, getCurrentUser);
 
 export default router;
