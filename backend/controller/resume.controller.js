@@ -7,62 +7,92 @@ import streamifier from "streamifier";
 
 const { getDocument } = pdfjsLib;
 
-// Helper: parse Hugging Face / summary output realistically
-const parseAnalysis = (analysisText) => {
-  if (!analysisText || typeof analysisText !== "string") {
-    return {
-      skills: [],
-      experience: [],
-      education: [],
-      suitableRoles: [],
-      atsScore: 0,
-    };
+// Helper: Extract text from various file formats
+async function extractTextFromFile(buffer, mimetype) {
+  let text = "";
+
+  try {
+    if (mimetype === "application/pdf") {
+      // Extract from PDF
+      const loadingTask = getDocument({ data: new Uint8Array(buffer) });
+      const pdf = await loadingTask.promise;
+
+      let pdfText = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        pdfText += content.items.map((item) => item.str).join(" ") + "\n";
+      }
+      text = pdfText.trim();
+
+      // Fallback to OCR if PDF text extraction is empty
+      if (!text || text.length < 50) {
+        console.warn("⚠️ PDF text extraction produced minimal text, using OCR...");
+        const ocrResult = await Tesseract.recognize(buffer, "eng");
+        text = ocrResult.data.text;
+      }
+    } else if (mimetype === "application/msword" || 
+               mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+      // For .doc/.docx - convert to text (basic approach)
+      text = buffer.toString("utf-8");
+    } else {
+      // Plain text files
+      text = buffer.toString("utf-8");
+    }
+
+    if (!text || text.trim().length < 50) {
+      throw new Error("Could not extract meaningful text from resume");
+    }
+
+    return text.trim();
+  } catch (error) {
+    console.error("Text extraction error:", error.message);
+    throw new Error(`Failed to extract text from file: ${error.message}`);
   }
+}
 
-  // Extract Skills, Experience, Education, Roles
-  const skillsMatch = analysisText.match(/Skills:\s*(.+)/i);
-  const expMatch = analysisText.match(/Experience:\s*(.+)/i);
-  const eduMatch = analysisText.match(/Education:\s*(.+)/i);
-  const rolesMatch = analysisText.match(/Roles?:\s*(.+)/i);
-
-  const skills = skillsMatch ? skillsMatch[1].split(/,\s*/g) : [];
-  const experience = expMatch
-    ? expMatch[1]
-        .split(/;\s*/g)
-        .map((e) => ({ role: e, company: "Company XYZ", duration: "1 yr" }))
-    : [];
-  const education = eduMatch
-    ? eduMatch[1].split(/;\s*/g).map((e) => ({
-        degree: e,
-        institution: "University ABC",
-        year: "2021",
-      }))
-    : [];
-  const suitableRoles = rolesMatch ? rolesMatch[1].split(/,\s*/g) : [];
-
-  // Simple ATS score calculation (based on skills + experience)
-  const atsScore = Math.min(100, skills.length * 15 + experience.length * 10);
-
-  return {
-    skills,
-    experience,
-    education,
-    suitableRoles,
-    atsScore,
-  };
-};
-
-// ✅ Upload & Analyze Resume
+// Upload & Analyze Resume
 export const uploadResume = async (req, res) => {
   try {
-    if (!req.file)
-      return res.status(400).json({ error: "❌ No file uploaded" });
+    if (!req.file) {
+      return res.status(400).json({
+        status: 400,
+        message: "No file uploaded. Please upload a resume (PDF, DOC, or DOCX)",
+      });
+    }
 
     const { originalname, mimetype, buffer } = req.file;
 
+    // Validate file type
+    const allowedMimeTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ];
+
+    if (!allowedMimeTypes.includes(mimetype)) {
+      return res.status(400).json({
+        status: 400,
+        message: "Invalid file type. Please upload PDF, DOC, DOCX, or TXT",
+      });
+    }
+
+    // --- Extract text from resume ---
+    let resumeText;
+    try {
+      resumeText = await extractTextFromFile(buffer, mimetype);
+    } catch (extractError) {
+      return res.status(400).json({
+        status: 400,
+        message: extractError.message,
+      });
+    }
+
     // --- Upload to Cloudinary ---
-    const uploadToCloudinary = () =>
-      new Promise((resolve, reject) => {
+    let uploadResult;
+    try {
+      uploadResult = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
             resource_type: "raw",
@@ -73,78 +103,83 @@ export const uploadResume = async (req, res) => {
         );
         streamifier.createReadStream(buffer).pipe(uploadStream);
       });
-
-    const uploadResult = await uploadToCloudinary();
-
-    // --- Extract text from PDF / OCR ---
-    let text = "";
-    if (mimetype === "application/pdf") {
-      try {
-        const loadingTask = getDocument({ data: new Uint8Array(buffer) });
-        const pdf = await loadingTask.promise;
-
-        let pdfText = "";
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          pdfText += content.items.map((item) => item.str).join(" ") + "\n";
-        }
-        text = pdfText.trim();
-
-        // Fallback OCR if text is empty
-        if (!text) {
-          const ocrResult = await Tesseract.recognize(buffer, "eng");
-          text = ocrResult.data.text;
-        }
-      } catch (err) {
-        console.warn("⚠️ PDF extraction failed, using OCR:", err.message);
-        const ocrResult = await Tesseract.recognize(buffer, "eng");
-        text = ocrResult.data.text;
-      }
-    } else {
-      text = buffer.toString("utf-8");
+    } catch (uploadError) {
+      console.error("Cloudinary upload error:", uploadError);
+      return res.status(500).json({
+        status: 500,
+        message: "Failed to upload file to cloud storage",
+      });
     }
 
-    // --- Hugging Face Analysis ---
-    const hfOutput = await analyzeResume(text);
-    const analysisText =
-      Array.isArray(hfOutput) && hfOutput[0]?.summary_text
-        ? hfOutput[0].summary_text
-        : typeof hfOutput === "string"
-        ? hfOutput
-        : JSON.stringify(hfOutput);
+    // --- Analyze Resume with HuggingFace ---
+    let analysis;
+    try {
+      analysis = await analyzeResume(resumeText);
+    } catch (analysisError) {
+      console.error("Analysis error:", analysisError);
+      return res.status(500).json({
+        status: 500,
+        message: "Resume analysis failed. Please try again.",
+        error: process.env.NODE_ENV === "development" ? analysisError.message : undefined,
+      });
+    }
 
-    const structured = parseAnalysis(analysisText);
+    // --- Save to MongoDB ---
+    try {
+      const resume = await Resume.create({
+        filename: originalname,
+        contentType: mimetype,
+        analysis,
+        fileUrl: uploadResult.secure_url,
+        cloudinaryId: uploadResult.public_id,
+      });
 
-    // --- Save in MongoDB ---
-    const resume = await Resume.create({
-      filename: originalname,
-      contentType: mimetype,
-      analysis: structured,
-      fileUrl: uploadResult.secure_url,
-      cloudinaryId: uploadResult.public_id,
-    });
-
-    return res.status(201).json({
-      message: "✅ Resume uploaded & analyzed",
-      url: uploadResult.secure_url,
-      analysis: structured,
-    });
+      return res.status(201).json({
+        status: 201,
+        message: "Resume uploaded and analyzed successfully",
+        data: {
+          id: resume._id,
+          filename: resume.filename,
+          fileUrl: uploadResult.secure_url,
+          analysis: resume.analysis,
+          uploadedAt: resume.createdAt,
+        },
+      });
+    } catch (dbError) {
+      console.error("Database save error:", dbError);
+      return res.status(500).json({
+        status: 500,
+        message: "Failed to save resume analysis",
+      });
+    }
   } catch (error) {
-    console.error("❌ Resume upload error:", error);
-    res.status(500).json({ message: "❌ Server error", error: error.message });
+    console.error("Resume upload error:", error);
+    res.status(500).json({
+      status: 500,
+      message: "Server error during resume processing",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
-};
+}
 
-// ✅ Fetch All Resumes
+// Fetch All Resumes
 export const getAllResumes = async (req, res) => {
   try {
-    const resumes = await Resume.find({}, "-__v -updatedAt");
-    res.json(resumes);
+    const resumes = await Resume.find({}, "-__v -updatedAt").sort({
+      createdAt: -1,
+    });
+    
+    res.status(200).json({
+      status: 200,
+      message: "Resumes retrieved successfully",
+      data: resumes,
+    });
   } catch (error) {
-    console.error("❌ Fetch resumes error:", error);
-    res
-      .status(500)
-      .json({ message: "❌ Failed to fetch resumes", error: error.message });
+    console.error("Fetch resumes error:", error);
+    res.status(500).json({
+      status: 500,
+      message: "Failed to fetch resumes",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
