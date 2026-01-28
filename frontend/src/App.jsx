@@ -16,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ScrollToTop from "./components/ScrollToTop";
 import PrivateRoute from "./components/PrivateRoutes";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Admin Pages
 import AdminLogin from "./pages/AdminLogin";
@@ -77,122 +78,125 @@ function AppLayout({ children }) {
 
 function App() {
   return (
-    <Router>
-      <AppLayout>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:id" element={<CourseDetails />} />
-          <Route path="/tech-courses" element={<TechCourses />} />
-          <Route path="/non-tech-courses" element={<NonTechCourses />} />
-          <Route path="/roadmap" element={<Roadmap />} />
+    <ErrorBoundary>
+      <Router>
+        <AppLayout>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:id" element={<CourseDetails />} />
+            <Route path="/tech-courses" element={<TechCourses />} />
+            <Route path="/non-tech-courses" element={<NonTechCourses />} />
+            <Route path="/roadmap" element={<Roadmap />} />
+            {/* Resume Checker */}
+            <Route
+              path="/resume-checker"
+              element={
+                <PrivateRoute>
+                  <ResumeChecker />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/result" element={<ResumeResult />} />
+            {/* Roadmap Routes */}
+            <Route
+              path="/roadmap/web-development"
+              element={<WebDevelopment />}
+            />
+            <Route path="/roadmap/GEN'AI" element={<AIML />} />
+            <Route path="/roadmap/cybersecurity" element={<Cybersecurity />} />
+            <Route path="/roadmap/data-analyst" element={<DataAnalyst />} />
+            <Route
+              path="/roadmap/machine-learning"
+              element={<MachineLearning />}
+            />
+            {/* Course Routes */}
+            <Route
+              path="/courses/Webdev"
+              element={
+                <PrivateRoute>
+                  <WebDevelopmentCourse />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/courses/GEN'AI"
+              element={
+                <PrivateRoute>
+                  <AIMLCourse />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/courses/cybersecurity"
+              element={
+                <PrivateRoute>
+                  <CybersecurityCourse />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/courses/DA"
+              element={
+                <PrivateRoute>
+                  <DataAnalystCourse />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/courses/ML"
+              element={
+                <PrivateRoute>
+                  <MachineLearningCourse />
+                </PrivateRoute>
+              }
+            />
+            $newRoute
+            {/* Admin Routes */}
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminDashboard />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/add-course"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminAddCourse />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/courses"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminCourses />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/create-course"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminCourseForm />
+                </ProtectedAdminRoute>
+              }
+            />
+          </Routes>
 
-          {/* Resume Checker */}
-          <Route
-            path="/resume-checker"
-            element={
-              <PrivateRoute>
-                <ResumeChecker />
-              </PrivateRoute>
-            }
-          />
-          <Route path="/result" element={<ResumeResult />} />
-
-          {/* Roadmap Routes */}
-          <Route path="/roadmap/web-development" element={<WebDevelopment />} />
-          <Route path="/roadmap/GEN'AI" element={<AIML />} />
-          <Route path="/roadmap/cybersecurity" element={<Cybersecurity />} />
-          <Route path="/roadmap/data-analyst" element={<DataAnalyst />} />
-          <Route path="/roadmap/machine-learning" element={<MachineLearning />} />
-
-          {/* Course Routes */}
-          <Route
-            path="/courses/Webdev"
-            element={
-              <PrivateRoute>
-                <WebDevelopmentCourse />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/courses/GEN'AI"
-            element={
-              <PrivateRoute>
-                <AIMLCourse />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/courses/cybersecurity"
-            element={
-              <PrivateRoute>
-                <CybersecurityCourse />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/courses/DA"
-            element={
-              <PrivateRoute>
-                <DataAnalystCourse />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/courses/ML"
-            element={
-              <PrivateRoute>
-                <MachineLearningCourse />
-              </PrivateRoute>
-            }
-          />
-
-$newRoute
-                    {/* Admin Routes */}
-          <Route path="/admin-login" element={<AdminLogin />} />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedAdminRoute>
-                <AdminDashboard />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/add-course"
-            element={
-              <ProtectedAdminRoute>
-                <AdminAddCourse />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/courses"
-            element={
-              <ProtectedAdminRoute>
-                <AdminCourses />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/create-course"
-            element={
-              <ProtectedAdminRoute>
-                <AdminCourseForm />
-              </ProtectedAdminRoute>
-            }
-          />
-        </Routes>
-
-        <ToastContainer position="top-right" autoClose={3000} />
-      </AppLayout>
-    </Router>
+          <ToastContainer position="top-right" autoClose={3000} />
+        </AppLayout>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
 export default App;
-
