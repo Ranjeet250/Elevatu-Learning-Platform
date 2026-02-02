@@ -6,7 +6,6 @@ import express from "express";
 import cors from "cors";
 
 import connectDB from "./config/db.js";
-import resumeRoutes from "./routes/resume.routes.js";
 import courseRoutes from "./routes/courseroutes.js";
 import userRoutes from "./routes/userouteslogin.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
@@ -39,6 +38,9 @@ const startServer = async () => {
     const allowedOrigins = [
       process.env.FRONTEND_URL || "http://localhost:5173",
       "http://localhost:3000",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:5176",
     ];
     app.use(
       cors({
@@ -57,7 +59,6 @@ const startServer = async () => {
     app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
     // Routes
-    app.use("/api/resume", resumeRoutes);
     app.use("/api/courses", courseRoutes);
     app.use("/api/users", userRoutes);
     app.use("/api/payments", paymentRoutes);

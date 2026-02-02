@@ -9,7 +9,7 @@ import {
   publishCourse,
   getAdminCourses,
   enrollCourse,
-} from "../controller/courseController.js";
+} from "../controller/coursecontroller.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { adminOnly } from "../middleware/adminMiddleware.js";
 

@@ -44,8 +44,6 @@ import CybersecurityCourse from "./pages/courses/cybersecurity";
 import DataAnalystCourse from "./pages/courses/DA";
 import MachineLearningCourse from "./pages/courses/ML";
 
-import ResumeChecker from "./pages/Resumechecker";
-import ResumeResult from "./components/ResumeResult";
 import PaymentEnrollment from "./pages/PaymentEnrollment";
 
 function AppLayout({ children }) {
@@ -92,16 +90,6 @@ function App() {
             <Route path="/tech-courses" element={<TechCourses />} />
             <Route path="/non-tech-courses" element={<NonTechCourses />} />
             <Route path="/roadmap" element={<Roadmap />} />
-            {/* Resume Checker */}
-            <Route
-              path="/resume-checker"
-              element={
-                <PrivateRoute>
-                  <ResumeChecker />
-                </PrivateRoute>
-              }
-            />
-            <Route path="/result" element={<ResumeResult />} />
             {/* Roadmap Routes */}
             <Route
               path="/roadmap/web-development"

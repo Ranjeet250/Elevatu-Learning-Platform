@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import place from "../assets/placeholdernew.png";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { analyzeResume } from "../api/resumeapi";
 
 export default function Home() {
   const { user } = useAuth();
@@ -11,9 +10,6 @@ export default function Home() {
 
   const [interest, setInterest] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const [file, setFile] = useState(null);
-  const [resumeLoading, setResumeLoading] = useState(false);
 
   const handleShowRoadmap = () => {
     if (!interest) return toast.error("Please select your interest.");
@@ -29,26 +25,6 @@ export default function Home() {
     const route = routes[interest];
     if (!route) return toast.error("Invalid selection");
     navigate(route);
-  };
-
-  const handleResumeUpload = async (e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
-
-    setResumeLoading(true);
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    try {
-      const response = await analyzeResume(formData);
-      navigate("/result", { state: response });
-      toast.success("Resume analyzed successfully!");
-    } catch (error) {
-      toast.error("Error analyzing resume");
-      console.error(error);
-    } finally {
-      setResumeLoading(false);
-    }
   };
 
   return (
@@ -91,23 +67,6 @@ export default function Home() {
               </button>
             </div>
           </div>
-
-          {/* Resume Checker */}
-          <div className="space-y-3 mt-8 p-6 bg-white rounded-lg shadow">
-            <h3 className="text-xl font-semibold text-gray-800">
-              {" "}
-              Check Your Resume
-            </h3>
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={handleResumeUpload}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-            {resumeLoading && (
-              <p className="text-blue-600">Analyzing resume...</p>
-            )}
-          </div>
         </div>
 
         <img
@@ -146,19 +105,6 @@ export default function Home() {
               <h3 className="text-2xl font-semibold text-green-800">Courses</h3>
               <p className="text-sm text-gray-700 mt-2">
                 View available curated courses
-              </p>
-            </Link>
-
-            {/* Resume Checker */}
-            <Link
-              to="/resume-checker"
-              className="bg-gradient-to-r from-purple-100 to-purple-200 hover:from-purple-200 hover:to-purple-300 p-6 rounded-lg shadow text-center transition transform hover:-translate-y-1"
-            >
-              <h3 className="text-2xl font-semibold text-purple-800">
-                Resume Checker
-              </h3>
-              <p className="text-sm text-gray-700 mt-2">
-                Get AI feedback on your resume
               </p>
             </Link>
 
