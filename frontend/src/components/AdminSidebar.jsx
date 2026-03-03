@@ -1,66 +1,88 @@
-﻿import { Link, useLocation } from "react-router-dom";
+﻿import { NavLink, Link } from "react-router-dom";
+import {
+  LayoutDashboard,
+  BookOpen,
+  Users,
+  Plus,
+  LogOut,
+  GraduationCap,
+  Shield,
+} from "lucide-react";
+
+const navItems = [
+  { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
+  { name: "Courses", path: "/admin/courses", icon: BookOpen },
+  { name: "Add Course", path: "/admin/add-course", icon: Plus },
+  { name: "Users", path: "/admin/users", icon: Users },
+];
 
 export default function AdminSidebar({ user, onLogout }) {
-  const location = useLocation();
-
-  const isActive = (path) => location.pathname === path;
-
   return (
-    <div className="w-64 bg-gradient-to-b from-blue-700 to-blue-900 text-white h-screen overflow-y-auto">
-      {/* Header */}
-      <div className="p-6 border-b border-blue-600">
-        <h1 className="text-2xl font-bold">ElevateU Admin</h1>
-        <p className="text-blue-200 text-sm mt-1">Course Management</p>
+    <aside className="w-64 bg-surface-900 text-white h-screen flex flex-col flex-shrink-0">
+      {/* Logo */}
+      <div className="h-16 flex items-center gap-2 px-5 border-b border-surface-700">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+          <GraduationCap className="w-4 h-4 text-white" />
+        </div>
+        <span className="text-lg font-bold">
+          ElevateU <span className="text-primary-400 text-sm font-medium">Admin</span>
+        </span>
       </div>
 
       {/* User Info */}
-      <div className="p-4 m-4 bg-blue-600 rounded-lg">
-        <p className="text-sm text-blue-200">Logged in as</p>
-        <p className="font-semibold text-lg truncate">{user?.name}</p>
-        <p className="text-xs text-blue-200">{user?.email}</p>
+      <div className="px-4 py-4">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-800">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+            {user?.name?.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium truncate">{user?.name}</p>
+            <div className="flex items-center gap-1 text-xs text-primary-400">
+              <Shield className="w-3 h-3" />
+              Admin
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="p-4 space-y-2">
-        <Link
-          to="/admin"
-          className={`block px-4 py-2 rounded-lg transition ${
-            isActive("/admin")
-              ? "bg-blue-600"
-              : "hover:bg-blue-600 text-blue-100"
-          }`}
-        >
-          Dashboard
-        </Link>
-
-        <Link
-          to="/admin/add-course"
-          className={`block px-4 py-2 rounded-lg transition ${
-            isActive("/admin/add-course")
-              ? "bg-blue-600"
-              : "hover:bg-blue-600 text-blue-100"
-          }`}
-        >
-          Add Course
-        </Link>
-
-        <Link
-          to="/courses"
-          className="block px-4 py-2 rounded-lg hover:bg-blue-600 text-blue-100 transition"
-        >
-          View All Courses
-        </Link>
+      <nav className="flex-1 px-3 space-y-1">
+        {navItems.map(({ name, path, icon: Icon }) => (
+          <NavLink
+            key={name}
+            to={path}
+            end={path === "/admin"}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+              ${isActive
+                ? "bg-primary-600 text-white shadow-sm"
+                : "text-surface-300 hover:bg-surface-800 hover:text-white"
+              }`
+            }
+          >
+            <Icon className="w-5 h-5 flex-shrink-0" />
+            <span>{name}</span>
+          </NavLink>
+        ))}
       </nav>
 
-      {/* Logout */}
-      <div className="absolute bottom-0 w-64 p-4 border-t border-blue-600">
+      {/* Bottom */}
+      <div className="p-3 border-t border-surface-700">
+        <Link
+          to="/"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-surface-300 hover:bg-surface-800 hover:text-white transition-colors mb-1"
+        >
+          <GraduationCap className="w-5 h-5" />
+          View Site
+        </Link>
         <button
           onClick={onLogout}
-          className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
         >
-          Logout
+          <LogOut className="w-5 h-5" />
+          Log Out
         </button>
       </div>
-    </div>
+    </aside>
   );
 }

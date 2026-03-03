@@ -9,6 +9,7 @@ import connectDB from "./config/db.js";
 import courseRoutes from "./routes/courseroutes.js";
 import userRoutes from "./routes/userouteslogin.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 
 // Validate required environment variables
@@ -62,6 +63,7 @@ const startServer = async () => {
     app.use("/api/courses", courseRoutes);
     app.use("/api/users", userRoutes);
     app.use("/api/payments", paymentRoutes);
+    app.use("/api/admin", adminRoutes);
 
     // Health check endpoint
     app.get("/api/health", (req, res) => {

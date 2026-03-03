@@ -18,12 +18,18 @@ import PrivateRoute from "./components/PrivateRoutes";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 
+// Dashboard Pages
+import Dashboard from "./pages/Dashboard";
+import Notes from "./pages/Notes";
+import PurchaseHistory from "./pages/PurchaseHistory";
+
 // Admin Pages
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAddCourse from "./pages/AdminAddCourse";
 import AdminCourseForm from "./pages/AdminCourseForm";
 import AdminCourses from "./pages/AdminCourses";
+import AdminUsers from "./pages/AdminUsers";
 
 // Course Pages
 import Courses from "./pages/courses/Courses";
@@ -31,13 +37,14 @@ import CourseDetails from "./pages/CourseDetails";
 import TechCourses from "./pages/TechCourses";
 import NonTechCourses from "./pages/NonTechCourses";
 
-// Other Pages
+// Roadmap Pages
 import WebDevelopment from "./pages/roadmaps/WebDevelopment";
 import AIML from "./pages/roadmaps/GEN'AI";
 import Cybersecurity from "./pages/roadmaps/Cybersecurity";
 import DataAnalyst from "./pages/roadmaps/DataAnalyst";
 import MachineLearning from "./pages/roadmaps/MachineLearning";
 
+// Course Detail Pages
 import WebDevelopmentCourse from "./pages/courses/Webdev";
 import AIMLCourse from "./pages/courses/GEN'AI";
 import CybersecurityCourse from "./pages/courses/cybersecurity";
@@ -46,29 +53,31 @@ import MachineLearningCourse from "./pages/courses/ML";
 
 import PaymentEnrollment from "./pages/PaymentEnrollment";
 
+// Routes that should NOT show the public Navbar/Footer
+const noLayoutRoutes = [
+  "/login",
+  "/register",
+  "/dashboard",
+  "/notes",
+  "/purchase-history",
+  "/admin-login",
+  "/admin",
+  "/admin/add-course",
+  "/admin/courses",
+  "/admin/create-course",
+];
+
 function AppLayout({ children }) {
   const location = useLocation();
-  const noLayoutRoutes = [
-    "/result",
-    "/admin-login",
-    "/admin",
-    "/admin/add-course",
-    "/admin/courses",
-    "/admin/create-course",
-  ];
-  const hideLayout = noLayoutRoutes.includes(location.pathname);
+  const hideLayout = noLayoutRoutes.some((r) =>
+    location.pathname.startsWith(r)
+  );
 
   return (
-    <div
-      className={`min-h-screen flex flex-col ${hideLayout ? "bg-gray-50" : ""}`}
-    >
+    <div className="min-h-screen flex flex-col">
       {!hideLayout && <Navbar />}
-
-      <main className="flex-grow">
-        {children}
-        <ScrollToTop />
-      </main>
-
+      <main className="flex-grow">{children}</main>
+      <ScrollToTop />
       {!hideLayout && <Footer />}
     </div>
   );
@@ -90,97 +99,45 @@ function App() {
             <Route path="/tech-courses" element={<TechCourses />} />
             <Route path="/non-tech-courses" element={<NonTechCourses />} />
             <Route path="/roadmap" element={<Roadmap />} />
+
             {/* Roadmap Routes */}
-            <Route
-              path="/roadmap/web-development"
-              element={<WebDevelopment />}
-            />
+            <Route path="/roadmap/web-development" element={<WebDevelopment />} />
             <Route path="/roadmap/GEN'AI" element={<AIML />} />
             <Route path="/roadmap/cybersecurity" element={<Cybersecurity />} />
             <Route path="/roadmap/data-analyst" element={<DataAnalyst />} />
-            <Route
-              path="/roadmap/machine-learning"
-              element={<MachineLearning />}
-            />
-            {/* Course Routes */}
-            <Route
-              path="/courses/Webdev"
-              element={
-                <PrivateRoute>
-                  <WebDevelopmentCourse />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/courses/GEN'AI"
-              element={
-                <PrivateRoute>
-                  <AIMLCourse />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/courses/cybersecurity"
-              element={
-                <PrivateRoute>
-                  <CybersecurityCourse />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/courses/DA"
-              element={
-                <PrivateRoute>
-                  <DataAnalystCourse />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/courses/ML"
-              element={
-                <PrivateRoute>
-                  <MachineLearningCourse />
-                </PrivateRoute>
-              }
-            />
-            $newRoute
+            <Route path="/roadmap/machine-learning" element={<MachineLearning />} />
+
+            {/* Protected Course Routes */}
+            <Route path="/courses/Webdev" element={<PrivateRoute><WebDevelopmentCourse /></PrivateRoute>} />
+            <Route path="/courses/GEN'AI" element={<PrivateRoute><AIMLCourse /></PrivateRoute>} />
+            <Route path="/courses/cybersecurity" element={<PrivateRoute><CybersecurityCourse /></PrivateRoute>} />
+            <Route path="/courses/DA" element={<PrivateRoute><DataAnalystCourse /></PrivateRoute>} />
+            <Route path="/courses/ML" element={<PrivateRoute><MachineLearningCourse /></PrivateRoute>} />
+
+            {/* Dashboard Routes (private) */}
+            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/notes" element={<PrivateRoute><Notes /></PrivateRoute>} />
+            <Route path="/purchase-history" element={<PrivateRoute><PurchaseHistory /></PrivateRoute>} />
+
+            {/* Payment */}
+            <Route path="/courses/:id/enroll" element={<PrivateRoute><PaymentEnrollment /></PrivateRoute>} />
+
             {/* Admin Routes */}
             <Route path="/admin-login" element={<AdminLogin />} />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboard />
-                </ProtectedAdminRoute>
-              }
-            />
-            <Route
-              path="/admin/add-course"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminAddCourse />
-                </ProtectedAdminRoute>
-              }
-            />
-            <Route
-              path="/admin/courses"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminCourses />
-                </ProtectedAdminRoute>
-              }
-            />
-            <Route
-              path="/admin/create-course"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminCourseForm />
-                </ProtectedAdminRoute>
-              }
-            />
+            <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+            <Route path="/admin/add-course" element={<ProtectedAdminRoute><AdminAddCourse /></ProtectedAdminRoute>} />
+            <Route path="/admin/courses" element={<ProtectedAdminRoute><AdminCourses /></ProtectedAdminRoute>} />
+            <Route path="/admin/create-course" element={<ProtectedAdminRoute><AdminCourseForm /></ProtectedAdminRoute>} />
+            <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
           </Routes>
 
-          <ToastContainer position="top-right" autoClose={3000} />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar
+            newestOnTop
+            toastClassName="!rounded-xl !shadow-elevated !border !border-surface-100"
+          />
         </AppLayout>
       </Router>
     </ErrorBoundary>

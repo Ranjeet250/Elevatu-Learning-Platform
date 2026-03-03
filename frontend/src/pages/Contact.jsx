@@ -1,62 +1,152 @@
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { Mail, User, MessageSquare, Send, MapPin, Phone, Clock } from "lucide-react";
+
 export default function Contact() {
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise((r) => setTimeout(r, 1000));
+      toast.success("Message sent successfully!");
+      setFormData({ name: "", email: "", message: "" });
+    } catch {
+      toast.error("Failed to send message");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const contactInfo = [
+    { icon: Mail, label: "Email", value: "support@elevateu.com", href: "mailto:support@elevateu.com" },
+    { icon: Phone, label: "Phone", value: "+91 12345-67890", href: "tel:+911234567890" },
+    { icon: MapPin, label: "Location", value: "Bangalore, India" },
+    { icon: Clock, label: "Hours", value: "Mon - Fri: 9AM - 6PM IST" },
+  ];
+
   return (
-    <div className="pt-12 px-6 md:px-16 py-12 bg-gradient-to-br from-blue-50 to-white min-h-screen">
-      <h1 className="text-4xl font-bold text-blue-800 text-center mb-12">
-        📬 Contact Us
-      </h1>
+    <div className="min-h-screen bg-surface-50 py-16">
+      <div className="section-container">
+        {/* Header */}
+        <div className="text-center mb-16 animate-fadeIn">
+          <h1 className="section-heading mb-3">Get in Touch</h1>
+          <p className="section-subheading mx-auto">
+            Have a question or feedback? We'd love to hear from you.
+          </p>
+        </div>
 
-      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-xl p-8 space-y-6 border border-blue-100">
-        <p className="text-gray-700 text-lg text-center">
-          Got a question, suggestion, or need support? Fill out the form below
-          and we'll get back to you soon.
-        </p>
-
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="col-span-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Your Name
-            </label>
-            <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-400 outline-none"
-              placeholder="Enter your name"
-              required
-            />
+        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* Contact Cards */}
+          <div className="space-y-4 animate-fadeIn">
+            {contactInfo.map(({ icon: Icon, label, value, href }) => (
+              <div key={label} className="card p-5 flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-5 h-5 text-primary-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-surface-500">
+                    {label}
+                  </p>
+                  {href ? (
+                    <a
+                      href={href}
+                      className="text-surface-900 font-medium hover:text-primary-600 transition-colors"
+                    >
+                      {value}
+                    </a>
+                  ) : (
+                    <p className="text-surface-900 font-medium">{value}</p>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="col-span-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-400 outline-none"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
+          {/* Contact Form */}
+          <div className="lg:col-span-2 card p-8 animate-fadeIn animate-delay-100">
+            <h2 className="text-xl font-semibold text-surface-900 mb-6">
+              Send us a message
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-surface-700 mb-1.5">
+                    Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+                    <input
+                      name="name"
+                      type="text"
+                      required
+                      placeholder="Your name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="input-field !pl-10"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-surface-700 mb-1.5">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+                    <input
+                      name="email"
+                      type="email"
+                      required
+                      placeholder="you@example.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="input-field !pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
 
-          <div className="col-span-1 md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Message
-            </label>
-            <textarea
-              rows="4"
-              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-400 outline-none"
-              placeholder="Write your message here..."
-              required
-            ></textarea>
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-surface-700 mb-1.5">
+                  Message
+                </label>
+                <div className="relative">
+                  <MessageSquare className="absolute left-3.5 top-3.5 w-4 h-4 text-surface-400" />
+                  <textarea
+                    name="message"
+                    rows={5}
+                    required
+                    placeholder="How can we help you?"
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="input-field !pl-10 resize-none"
+                  />
+                </div>
+              </div>
 
-          <div className="col-span-1 md:col-span-2 flex justify-center">
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
-            >
-              Send Message
-            </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Send Message
+                  </>
+                )}
+              </button>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
