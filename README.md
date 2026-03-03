@@ -6,7 +6,7 @@
 
 Structured learning paths · AI-powered recommendations · Course management · Progress tracking
 
-[Live Demo](#) · [Report Bug](../../issues) · [Request Feature](../../issues)
+
 
 </div>
 
@@ -106,61 +106,9 @@ ElevateU/
 └── README.md
 ```
 
----
 
-## 🚀 Getting Started
 
-### Prerequisites
 
-- **Node.js** v18+
-- **MongoDB** (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
-- **npm** or **yarn**
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/yourusername/ElevateU.git
-cd ElevateU
-```
-
-### 2. Setup Backend
-
-```bash
-cd backend
-npm install
-```
-
-Create a `.env` file in the `backend/` directory:
-
-```env
-PORT=5000
-MONGO_URI=mongodb+srv://your_connection_string
-JWT_SECRET=your_jwt_secret_key
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-HUGGINGFACE_API_KEY=your_hf_api_key
-FRONTEND_URL=http://localhost:5173
-```
-
-Start the backend server:
-
-```bash
-npm start        # Production
-npm run dev      # Development (with nodemon)
-```
-
-### 3. Setup Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-The app will be running at **http://localhost:5173**
-
----
 
 ## 🔐 Authentication & Roles
 
@@ -175,7 +123,7 @@ The app will be running at **http://localhost:5173**
 |---------|-------|----------|
 | Admin | `admin@example.com` | `Admin123` |
 
-> ⚠️ **Change default credentials in production!**
+
 
 ### Role-Based Routing
 
@@ -243,46 +191,5 @@ The platform uses a custom design system built on Tailwind CSS:
 | Admin Dashboard | Real-time stats, course table, recent users |
 | Admin Users | User management with role switching |
 
----
 
-## 🚢 Deployment
 
-### Frontend (Vercel)
-
-```bash
-cd frontend
-npm run build
-# Deploy the dist/ folder to Vercel
-```
-
-### Backend (Render / Railway)
-
-1. Set environment variables on your hosting platform
-2. Set build command: `npm install`
-3. Set start command: `npm start`
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the ISC License.
-
----
-
-<div align="center">
-
-**Built with ❤️ by the ElevateU Team**
-
-⭐ Star this repo if you found it helpful!
-
-</div>
